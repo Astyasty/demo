@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: User and Partner Service API
+  description: API for managing users, partners, and subscription plans
+  version: 1.0.0
+
+servers:
+  - url: https://{host}/api
+    description: Main API server
+    variables:
+      host:
+        default: "example.com"
+        description: API hostname
+
+paths:
+  /api/external/user:
+    get:
+      summary: Get user details
+      description: Get information of a user
+      operationId: getUserDetails
+      parameters:
+        - name: user_id
+          in: query
+          description: Unique user identifier
+          required: false
+          schema:
+            type: string
+            example: "3453255"
+        - name: from
+          in: query
+          description: Pagination start timestamp
+          required: false
+          schema:
+            type: integer
+            example: 1633036800
+        - name: to
+          in: query
+          description: Pagination end timestamp
+          required: false
+          schema:
+            type: integer
+            example: 1633123200
+        - name: limit
+          in: query
+          description: Limit to records returned
+          required: false
+          schema:
+            type: integer
+            default: 1000
+            minimum: 10
+            maximum: 1000
+        - name: provider_id
+          in: query
+          description: Unique user partner identifier
+          required: false
+          schema:
+            type: string
+            example: "2323"
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    example: "3453255"
+                  provider_id:
+                    type: string
+                    example: "2323"
+                  status:
+                    type: string
+                    enum: [Active, Inactive, Idle, Signing]
+                  type:
+                    type: string
+                    enum: [Basic, Guest, Company, Advanced, Admin]
+                  zone:
+                    type: string
+                    example: "ru"
+                  sub_status:
+                    type: string
+                    enum: [Signed, Unsigned, Absent]
+                    example: "unsigned"
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+
+  /api/partner:
+    get:
+      summary: Get partner details
+      description: Get information of a partner
+      operationId: getPartnerDetails
+      parameters:
+        - name: provider_id
+          in: query
+          description: Unique partner identifier (four characters long)
+          required: true
+          schema:
+            type: string
+            example: "2323"
+        - name: status
+          in: query
+          description: Partner operation state (optional)
+          required: false
+          schema:
+            type: string
+            enum: [Active, Stopped]
+      responses:
+        '200':
+          description: Partner details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider_id:
+                    type: string
+                    example: "2323"
+                  status:
+                    type: string
+                    enum: [Active, Stopped]
+                    example: "Active"
+        '400':
+          description: Bad request
+        '404':
+          description: Partner not found
+
+  /api/plans:
+    post:
+      summary: Create a new service plan
+      description: Allows creating a new service plan for a provider
+      operationId: createPlan
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider_id:
+                  type: string
+                  example: "2323"
+                  description: Unique identifier for the provider
+                plan_name:
+                  type: string
+                  example: "Premium Plan"
+                  description: Name of the plan to be created
+                plan_details:
+                  type: string
+                  example: "Access to advanced features"
+                  description: Details about what the plan includes
+      responses:
+        '201':
+          description: Plan created successfully
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized access
+
+  /api/plans/{plan_id}:
+    put:
+      summary: Update a service plan
+      description: Modify an existing service plan
+      operationId: updatePlan
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: plan_id
+          in: path
+          description: Unique identifier of the plan to update
+          required: true
+          schema:
+            type: string
+            example: "Plan_123"
+        - name: provider_id
+          in: query
+          description: Unique provider identifier
+          required: true
+          schema:
+            type: string
+            example: "2323"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_name:
+                  type: string
+                  example: "Updated Plan"
+                plan_details:
+                  type: string
+                  example: "Updated plan with more features"
+      responses:
+        '200':
+          description: Plan updated successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Plan not found
+        '401':
+          description: Unauthorized access
+
+    delete:
+      summary: Delete a service plan
+      description: Remove a service plan from the system
+      operationId: deletePlan
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: plan_id
+          in: path
+          description: Unique identifier of the plan to delete
+          required: true
+          schema:
+            type: string
+            example: "Plan_123"
+        - name: provider_id
+          in: query
+          description: Unique provider identifier
+          required: true
+          schema:
+            type: string
+            example: "2323"
+      responses:
+        '204':
+          description: Plan deleted successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Plan not found
+        '401':
+          description: Unauthorized access
+
+  /api/plans/available:
+    get:
+      summary: Get available plans for a provider
+      description: Fetch the list of available plans for a specific provider
+      operationId: getAvailablePlans
+      parameters:
+        - name: provider_id
+          in: query
+          description: Unique partner identifier
+          required: true
+          schema:
+            type: string
+            example: "2323"
+      responses:
+        '200':
+          description: Plans retrieved successfully for the given provider
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    plan_id:
+                      type: string
+                      example: "Plan_123"
+                    plan_name:
+                      type: string
+                      example: "Premium Plan"
+                    plan_details:
+                      type: string
+                      example: "Access to all features"
+        '400':
+          description: Bad request
+        '404':
+          description: No plans found for the provided provider
+
+  # User Management Endpoints
+  /users/{userId}/status:
+    put:
+      summary: Change the status of a user
+      operationId: changeUserStatus
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user whose status is being updated
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+            enum: [Active, Inactive, Idle, Signing]
+          description: The new status of the user
+      responses:
+        '200':
+          description: Status successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [Active, Inactive, Idle, Signing]
+        '400':
+          description: Bad status, or bad user ID
+        '404':
+          description: User not found
+
+  /users/{userId}/type:
+    put:
+      summary: Change the type of a user
+      operationId: changeUserType
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user whose type is being updated
+        - in: query
+          name: userType
+          required: true
+          schema:
+            type: string
+            enum: [Basic, Guest, Company, Advanced]
+          description: The new type of the user
+      responses:
+        '200':
+          description: Type successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  newType:
+                    type: string
+                    enum: [Basic, Guest, Company, Advanced]
+        '400':
+          description: Bad user type or user ID
+        '404':
+          description: User not found
+
+  /users/{userId}/subscribe:
+    post:
+      summary: Subscribe a user to a plan
+      operationId: subscribeUserToPlan
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user to subscribe to a plan
+        - in: query
+          name: subscription
+          required: true
+          schema:
+            type: object
+            properties:
+              planId:
+                type: string
+                description: The ID of the plan the user wants to subscribe to
+      responses:
+        '200':
+          description: User successfully subscribed to the plan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  planId:
+                    type: string
+                  sub_status:
+                    type: string
+                    enum: [Signed, Unsigned]
+        '400':
+          description: Bad user or plan ID, or user is not eligible to subscribe
+        '404':
+          description: User or Plan not found
+  /users/{userId}/Unsubscribe:
+    post:
+      summary: Unubscribe a user from a plan
+      operationId: unsubscribeUserToPlan
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the user to unsubscribe from a plan
+        - in: query
+          name: subscription
+          required: true
+          schema:
+            type: object
+            properties:
+              planId:
+                type: string
+                description: The ID of the plan the user wants to unsubscribe from
+      responses:
+        '200':
+          description: User successfully unsubscribed from the plan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  planId:
+                    type: string
+        '400':
+          description: Bad user or plan ID, or user is not eligible to subscribe
+        '404':
+          description: User or Plan not found
+          
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
