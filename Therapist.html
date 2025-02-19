@@ -1,0 +1,157 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+p {
+    line-height: 50%;
+}
+</style>
+</head>
+<body onload="initialize()">
+
+<h1>Therapist</h1>
+
+<p>Write here: <input id="textbox" size="150"/></p>
+<p><button onclick="submitLine()">Submit</button></p>
+
+<div id="conversation"></div>
+
+<script>
+//Vabiable to hold the conversation
+var therapySession;
+
+//Generic responses when there's nothing else to say
+const genericResponses = [
+    "Uh-huh.",
+    "Go on.",
+    "Why do you say that?",
+    "That's very interesting.",
+    "Fascinating...",
+    "Keep talking."];
+
+//Responces when the user asked a question
+const questionResponses = [
+    "Why do you ask that?",
+    "What do <em>you</em> think?",
+    "That's an interesting question.",
+    "How long have you wanted to know that?",
+    "That depends on who you ask."];
+
+//Responces when the user ended his sentemce with an exclamation point
+const exclamationResponses = [
+    "Please calm down.",
+    "No need to get so excited.",
+    "You sound very passionate about that.",
+    "Would you care to restate that in a more neutral tone?"];
+	
+//This block helps to switch between the first person and the third person words
+const povSwitches = {
+    "I": "you",
+    "i": "you",
+    "me": "you",
+    "myself": "yourself",
+    "am": "are",
+    "my": "your",
+    "My": "your",
+    "I'm": "you're",
+    "I'd": "you'd",
+    "I'll": "you'll",
+    "i'm": "you're",
+    "i'd": "you'd",
+    "i'll": "you'll"
+}
+
+//How to begin the question
+const questionStarts = [
+    "Why do you say that",
+    "How is it that",
+    "Can you tell me more about how",
+    "And why is it that",
+    "Can you explain why you say that"];
+	
+//The very first therapist's sentence
+function initialize() {
+    therapySession = "<p> I am the psychotherapist. What is your problem? </p>";
+    conversation.innerHTML = therapySession;
+}
+
+//The answer of the patient after pressing Submit button
+function submitLine() {
+    var patientLine = textbox.value;
+    therapySession += "<p> <em>" + patientLine + "</em> </p>";
+
+	//Selection a response based on the last character
+	var therapistLine;
+    if (lastChar(patientLine) == "?") {
+        therapistLine = randomElement(questionResponses);
+    } else if (lastChar(patientLine) == "!") {
+        therapistLine = randomElement(exclamationResponses);
+    } else {
+        therapistLine = createQuestion(patientLine);
+}
+	//Selection of a random phrase from the generic responces section
+    if (therapistLine == null) {
+        therapistLine = randomElement(genericResponses);
+}
+ 
+    therapySession += "<p>" + therapistLine + "</p>";
+	conversation.innerHTML = therapySession;
+}
+
+//Returns a random phrase from an array
+function randomElement(myArray) {
+    var index = Math.floor(Math.random() * myArray.length);
+    return myArray[index];
+}
+
+//Returns the last characters of a string
+function lastChar(myString) {
+    return myString.substring(myString.length - 1);
+}
+
+//Creates a question based on a patient's line
+function createQuestion(patientLine) {
+	//Detect using of "you", "your" and "yourself" in the line
+    if (patientLine.toLowerCase().indexOf("you") != -1) {
+		//returns null if there is 
+        return null;
+}
+ 
+	//If there is a perion in the end of a sentence, it remove it
+    if (lastChar(patientLine) == ".") {
+        patientLine = patientLine.substring(0, patientLine.length - 1);
+}
+ 
+    //Add space between the beginning and the end 
+	var modifiedLine = " " + patientLine + " ";
+
+	//Loop through all properties of the povSwitches object and replace the first person's words with the third person's words
+	var found = false;
+    for (var property in povSwitches) {
+        if (povSwitches.hasOwnProperty(property)) {
+        var modifiedProperty = " " + property + " ";
+        if (modifiedLine.indexOf(modifiedProperty) != -1) {
+            modifiedLine = modifiedLine.replace(modifiedProperty, 
+                " " + povSwitches[property] + " ");
+            found = true;
+        }
+    }
+}
+
+//If a replacement was made then return a question 
+if (found) {
+ 
+	//Removes a space at the end of modifiedLine
+    modifiedLine = modifiedLine.substring(0, modifiedLine.length - 1);
+ 
+    //Creates a full question and returnes it
+	return randomElement(questionStarts) + " " + modifiedLine + "?";
+}
+
+    //If there aren't any replacement, returnes null
+	return null;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>Creating a partition on a disk in Linux</title>
+<meta charset="utf-8"/>
+<meta name="description" content="instruction how to create partitions"/>
+<style>
+body {
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+a {
+ text-decoration: none;
+ font-weight: 400 !important;
+}
+
+a:hover {
+ text-decoration: none;
+ color: #135ea9 !important;
+}
+
+img {
+  max-width: 50%;
+}
+
+ul {
+  line-height: 1.55em;
+  margin-bottom: 1.5em;
+}
+
+</style>
+
+</head>
+
+<body>
+<h1>
+Creating a partition on a disk in Linux
+</h1>
+
+<p>
+Creating a partition on a disk helps to organize different memory regions for specific uses. It also helps to install multiple operating systems on one machine and minimize the damage in case of disk corruption.
+</p>
+
+<p>
+All commands must be run as the root user.
+</p>
+
+<p>
+To create a partition in a disk in Linux:
+</p>
+
+<ol>
+<li>Run the command to list all existing disks and partitions:
+<code>sudo fdisk -l</code>
+<li>Run the command to list all existing disks and partitions:
+<code>sudo fdisk <The path to an unpartitioned disk></code>
+<li>Press <code>n</code> to create a new partition.
+<li>Select one of the following steps to choose the partition type:
+<ul style="margin: 0;">
+  <li>To create a primary partition, press <code>p</code>.</li>
+  <li>To create an extended partition, press <code>e</code>.</li>
+</ul>
+</li>
+<li>Enter the number of a partition.</li>
+<li>Enter the first sector number.</li>
+<li>Enter the last sector number or number of sectors or a partition size.</li>
+<li>Press <code>w</code> to write the new partition on the disk.</li>
+</ol>
+<p>To view a new partition table, press <code>p</code>. To change a partition type, press <code>t</code> and enter a number for a partition type.
+</p>
+</html>
